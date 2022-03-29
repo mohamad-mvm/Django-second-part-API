@@ -25,6 +25,8 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_price_with_tax(self, product:Product):
       return product.unit_price * Decimal(1.23)
 
+
+
 # class ProductSerializer(serializers.Serializer):
 #     id = serializers.IntegerField()
 #     title = serializers.CharField(max_length=255)
