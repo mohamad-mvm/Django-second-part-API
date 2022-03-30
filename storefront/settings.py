@@ -90,7 +90,7 @@ WSGI_APPLICATION = 'storefront.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'storefront2',
+        'NAME': 'storefront4',
         'HOST': '.',
         'USER': 'sa',
         'PASSWORD': '99mv944',
