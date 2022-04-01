@@ -9,18 +9,36 @@ from .models import Product, Collection
 from .serializers import ProductSerializer,CollectionSerializer
 
 
+class ProductList(ListCreateAPIView):
+    # if you havent any logic for control in function you can use this Variable directly
+    queryset = Product.objects.select_related('collection').all()
+    serializer_class = ProductSerializer
 
-class ProductList(APIView):
-    def get(self, request):
-        products = Product.objects.select_related('collection').all()
-        serializer = ProductSerializer(products, many=True)
-        return Response(serializer.data)
 
-    def post(self, request):
-        serializer = ProductSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # if you have any logic for control in function you can use below function
+    # def get_queryset(self):
+    #     return Product.objects.select_related('collection').all()
+
+    # def get_serializer_class(self):
+    #     return ProductSerializer
+
+    # for serializer_context you should use function
+
+    def get_serializer_context(self):
+        return {'requesr': self.request}
+
+
+# class ProductList(APIView):
+#     def get(self, request):
+#         products = Product.objects.select_related('collection').all()
+#         serializer = ProductSerializer(products, many=True, context={'request': request})
+#         return Response(serializer.data)
+
+#     def post(self, request):
+#         serializer = ProductSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class ProductDetail(APIView):
     def get_object(self, id):
@@ -78,17 +96,23 @@ class ProductDetail(APIView):
 #         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-@api_view(['GET','POST'])
-def collection_list(request):
-    if request.method == 'GET':
-        collections = Collection.objects.all().order_by('id')
-        serializer = CollectionSerializer(collections, many=True)
-        return Response(serializer.data)
-    elif request.method == 'POST':
-        serializer = CollectionSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+class collection_list(ListCreateAPIView):
+    queryset=Collection.objects.all().order_by('id')
+    serializer_class=CollectionSerializer
+    def get_serializer_context(self):
+        return {'requesr': self.request}
+
+# @api_view(['GET','POST'])
+# def collection_list(request):
+#     if request.method == 'GET':
+#         collections = Collection.objects.all().order_by('id')
+#         serializer = CollectionSerializer(collections, many=True)
+#         return Response(serializer.data)
+#     elif request.method == 'POST':
+#         serializer = CollectionSerializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 @api_view(['GET','PUT','DELETE'])
 def collection_detail(request, id):
