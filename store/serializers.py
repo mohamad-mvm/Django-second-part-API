@@ -1,8 +1,9 @@
+# sourcery skip: avoid-builtin-shadow
 import collections
 from decimal import Decimal
 from rest_framework import serializers
 
-from store.models import Product, Collection
+from store.models import Product, Collection, Reviews
 
 
 class CollectionSerializer(serializers.Serializer):
@@ -60,3 +61,8 @@ class CollectionSerializer(serializers.ModelSerializer):
 
     # def get_product_count(self, collection:Collection):
     #     return collection.product_set.count()
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Reviews
+        fields = ['id', 'date', 'name', 'description', 'product']

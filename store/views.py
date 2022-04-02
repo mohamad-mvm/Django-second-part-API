@@ -9,8 +9,8 @@ from rest_framework.viewsets import ModelViewSet,ReadOnlyModelViewSet
 from rest_framework.generics import ListCreateAPIView,RetrieveUpdateDestroyAPIView
 from rest_framework import status
 
-from .models import Product, Collection,OrderItem
-from .serializers import ProductSerializer,CollectionSerializer
+from .models import Product, Collection,OrderItem,Reviews
+from .serializers import ProductSerializer,CollectionSerializer,ReviewSerializer
 
 
 # mearge 2 products class in one view set
@@ -38,6 +38,12 @@ class CollectionViewSet(ModelViewSet):
             return Response({'error': 'Collection can not be deleted because it is assosiate with a product'},status=status.HTTP_405_METHOD_NOT_ALLOWED)
         return super().destroy(request, *args, **kwargs)
 
+class ReviewViewset(ModelViewSet):
+    queryset=Reviews.objects.all()
+    serializer_class=ReviewSerializer
+
+    def get_serializer_context(self):
+        return {'requesr': self.request}
 
 
 
