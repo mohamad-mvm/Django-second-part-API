@@ -56,7 +56,7 @@ class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
         fields = ['id', 'title','product_count']
-
+ 
     product_count = serializers.IntegerField(read_only=True)
 
     # def get_product_count(self, collection:Collection):
