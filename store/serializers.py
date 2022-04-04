@@ -56,7 +56,7 @@ class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
         fields = ['id', 'title','product_count']
- 
+
     product_count = serializers.IntegerField(read_only=True)
 
     # def get_product_count(self, collection:Collection):
@@ -65,4 +65,8 @@ class CollectionSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Reviews
-        fields = ['id', 'date', 'name', 'description', 'product']
+        fields = ['id', 'date', 'name', 'description']
+
+    def create(self, validated_data):
+        product_id=self.context['product_id']
+        return Reviews.objects.create(product_id=product_id,**validated_data)
