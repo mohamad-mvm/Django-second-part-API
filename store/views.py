@@ -2,6 +2,8 @@ from sqlite3 import connect
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse
 from django.db.models.aggregates import Count
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter,OrderingFilter
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,18 +13,17 @@ from rest_framework import status
 
 from .models import Product, Collection,OrderItem,Reviews
 from .serializers import ProductSerializer,CollectionSerializer,ReviewSerializer
+from.filters import ProductFilter
 
 
 # mearge 2 products class in one view set
 class ProductViewSet(ModelViewSet):
+    queryset=Product.objects.all()
     serializer_class = ProductSerializer
-
-    def get_queryset(self):
-        queryset = Product.objects.all()
-        collection_id=self.request.query_params.get('collection_id',None)
-        if collection_id is not None:
-            queryset = queryset.filter(collection_id=collection_id)
-        return queryset
+    filter_backends=[DjangoFilterBackend, SearchFilter,OrderingFilter]
+    filterset_class = ProductFilter
+    search_fields = ['title', 'description', 'collection__title']
+    ordering_fields = ['unit_price', 'last_update']
 
     def get_serializer_context(self):
         return {'requesr': self.request}
