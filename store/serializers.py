@@ -71,10 +71,16 @@ class ReviewSerializer(serializers.ModelSerializer):
         product_id=self.context['product_id']
         return Reviews.objects.create(product_id=product_id,**validated_data)
 
+class CartItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = ['id', 'product', 'quantity']
+
 
 # sourcery skip: avoid-builtin-shadow
 class CartSerializer(serializers.ModelSerializer):
     id=serializers.UUIDField(read_only=True)
+    items = CartItemSerializer(many=True)
     class Meta:
         model = Cart
-        fields = ['id']
+        fields = ['id','items']
