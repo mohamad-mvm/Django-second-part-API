@@ -15,7 +15,7 @@ from rest_framework.generics import ListCreateAPIView,RetrieveUpdateDestroyAPIVi
 from rest_framework import status
 
 from .models import CartItem, Product, Collection,OrderItem,Reviews,Cart
-from .serializers import ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer
+from .serializers import ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddToCartSerializer
 from.filters import ProductFilter
 
 
@@ -67,8 +67,14 @@ class CartViewset(CreateModelMixin,
 
 
 class CartItemViewset(ModelViewSet):
-    serializer_class = CartItemSerializer
-    queryset = CartItem.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddToCartSerializer
+        return CartItemSerializer
+
+    def get_serializer_context(self):
+        return {'cart_id': self.kwargs['cart_pk']}
 
     def get_queryset(self):
-        return CartItem.objects.filter(cart_id=self.kwargs['cart_pk']).all()
+        return CartItem.objects.select_related('product').filter(cart_id=self.kwargs['cart_pk']).all()
