@@ -1,0 +1,7 @@
+pip install django
+pip install pyodbc
+pip install mssql-django
+pip install django-debug-toolbar
+pip install django-filter
+pip install djangorestframework
+pip install drf-nested-routers
