@@ -74,7 +74,7 @@ class CartItemViewset(ModelViewSet):
             return AddToCartSerializer
         elif self.request.method == 'PATCH':
             return UpdateCartItemSerializer
-        return CartItemSerializer
+        return CartItemSerializer 
 
     def get_serializer_context(self):
         return {'cart_id': self.kwargs['cart_pk']}
