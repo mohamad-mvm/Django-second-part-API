@@ -40,9 +40,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     @admin.display(ordering='inventory')
     def inventory_status(self, product):
-        if product.inventory < 10:
-            return 'Low'
-        return 'OK'
+        return 'Low' if product.inventory < 10 else 'OK'
 
     @admin.action(description='Clear inventory')
     def clear_inventory(self, request, queryset):
