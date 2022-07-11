@@ -5,3 +5,5 @@ pip install django-debug-toolbar
 pip install django-filter
 pip install djangorestframework
 pip install drf-nested-routers
+pip install djoser
+pip install djangorestframework_simplejwt
