@@ -7,15 +7,15 @@ from rest_framework.filters import SearchFilter,OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from .pagination import DefaultPagination
 from rest_framework.decorators import api_view
-from rest_framework.mixins import CreateModelMixin,RetrieveModelMixin,DestroyModelMixin
+from rest_framework.mixins import CreateModelMixin,RetrieveModelMixin,DestroyModelMixin,UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet,ReadOnlyModelViewSet,GenericViewSet
 from rest_framework.generics import ListCreateAPIView,RetrieveUpdateDestroyAPIView
 from rest_framework import status
 
-from .models import CartItem, Product, Collection,OrderItem,Reviews,Cart
-from .serializers import ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddToCartSerializer,UpdateCartItemSerializer
+from .models import CartItem, Customer, Product, Collection,OrderItem,Reviews,Cart
+from .serializers import CustomerSerializer, ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddToCartSerializer,UpdateCartItemSerializer
 from.filters import ProductFilter
 
 
@@ -81,3 +81,8 @@ class CartItemViewset(ModelViewSet):
 
     def get_queryset(self):
         return CartItem.objects.select_related('product').filter(cart_id=self.kwargs['cart_pk']).all()
+
+
+class CustomerViewSet(CreateModelMixin,RetrieveModelMixin,UpdateModelMixin,GenericViewSet):
+    serializer_class = CustomerSerializer
+    queryset = Customer.objects.all()
