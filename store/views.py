@@ -7,6 +7,8 @@ from rest_framework.filters import SearchFilter,OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from .pagination import DefaultPagination
 from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin,RetrieveModelMixin,DestroyModelMixin,UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -86,3 +88,20 @@ class CartItemViewset(ModelViewSet):
 class CustomerViewSet(CreateModelMixin,RetrieveModelMixin,UpdateModelMixin,GenericViewSet):
     serializer_class = CustomerSerializer
     queryset = Customer.objects.all()
+    # permission_classes = [IsAuthenticated]
+
+    # def get_permissions(self):
+    #     return [AllowAny()] if self.request.method == 'GET' else [IsAuthenticated()]
+
+    @action(detail=False,methods=['GET','PUT'])
+    def me(self, request):
+        (customer,created) = Customer.objects.get_or_create(user_id=request.user.id)
+        if request.method == 'GET':
+            serializer = CustomerSerializer(customer)
+            return Response(serializer.data)
+        elif request.method == 'PUT':
+            serializer = CustomerSerializer(customer,data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
