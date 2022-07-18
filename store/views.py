@@ -15,7 +15,7 @@ from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet,ReadOnlyModelViewSet,GenericViewSet
 from rest_framework.generics import ListCreateAPIView,RetrieveUpdateDestroyAPIView
 from rest_framework import status
-from .permission import IsAdminOrReadOnly,FullDjangoModelPermissions
+from .permission import IsAdminOrReadOnly,FullDjangoModelPermissions, ViewCustomerHistory
 
 from .models import CartItem, Customer, Product, Collection,OrderItem,Reviews,Cart
 from .serializers import CustomerSerializer, ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddToCartSerializer,UpdateCartItemSerializer
@@ -93,6 +93,10 @@ class CustomerViewSet(ModelViewSet):
 
     # def get_permissions(self):
     #     return [AllowAny()] if self.request.method == 'GET' else [IsAuthenticated()]
+
+    @action(detail=True,permission_classes=[ViewCustomerHistory])
+    def history(self, request,pk):
+        return Response('ok')
 
     @action(detail=False,methods=['GET','PUT'],permission_classes=[IsAuthenticated])
     def me(self, request):
