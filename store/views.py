@@ -17,8 +17,8 @@ from rest_framework.generics import ListCreateAPIView,RetrieveUpdateDestroyAPIVi
 from rest_framework import status
 from .permission import IsAdminOrReadOnly,FullDjangoModelPermissions, ViewCustomerHistory
 
-from .models import CartItem, Customer, Product, Collection,OrderItem,Reviews,Cart
-from .serializers import CustomerSerializer, ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddToCartSerializer,UpdateCartItemSerializer
+from .models import CartItem, Customer, Order, Product, Collection,OrderItem,Reviews,Cart
+from .serializers import CustomerSerializer, ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddToCartSerializer,UpdateCartItemSerializer, OrderSerializer
 from.filters import ProductFilter
 
 
@@ -34,7 +34,7 @@ class ProductViewSet(ModelViewSet):
     ordering_fields = ['unit_price', 'last_update']
 
     def get_serializer_context(self):
-        return {'requesr': self.request}
+        return {'request': self.request}
 
     def destroy(self, request, *args, **kwargs):
         if OrderItem.objects.filter(product_id=kwargs['pk']).count() > 0:
@@ -110,3 +110,12 @@ class CustomerViewSet(ModelViewSet):
                 serializer.save()
                 return Response(serializer.data)
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+
+
+class OrderViewSet(ModelViewSet):
+    serializer_class = OrderSerializer
+    queryset = Order.objects.all()
+
+    def get_serializer_context(self):
+        return {'request': self.request}
