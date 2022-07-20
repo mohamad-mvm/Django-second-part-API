@@ -18,7 +18,7 @@ from rest_framework import status
 from .permission import IsAdminOrReadOnly,FullDjangoModelPermissions, ViewCustomerHistory
 
 from .models import CartItem, Customer, Order, Product, Collection,OrderItem,Reviews,Cart
-from .serializers import CustomerSerializer, ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddToCartSerializer,UpdateCartItemSerializer, OrderSerializer
+from .serializers import CreateOrderSerialiser, CustomerSerializer, ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddToCartSerializer,UpdateCartItemSerializer, OrderSerializer
 from.filters import ProductFilter
 
 
@@ -114,8 +114,19 @@ class CustomerViewSet(ModelViewSet):
 
 
 class OrderViewSet(ModelViewSet):
-    serializer_class = OrderSerializer
-    queryset = Order.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self, *args, **kwargs):
+        if self.request.method=='POST':
+            return CreateOrderSerialiser
+        return OrderSerializer
+
+    def get_queryset(self):
+        user=self.request.user
+        if user.is_staff:
+            return Order.objects.all()
+        (customer_id,CREATED)=Customer.objects.only('id').get_or_create(user_id=user.id)
+        return Order.objects.filter(customer_id=customer_id).all()
 
     def get_serializer_context(self):
-        return {'request': self.request}
+        return {'user_id': self.request.user.id}
