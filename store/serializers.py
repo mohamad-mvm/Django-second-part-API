@@ -1,9 +1,11 @@
 # sourcery skip: avoid-builtin-shadow
-import collections
+from dataclasses import fields
 from decimal import Decimal
+from pyexpat import model
+from django.db import transaction
+from django.forms import ValidationError
 from rest_framework import serializers
-
-from store.models import Cart, CartItem, Customer, Order, Product, Collection, Reviews, OrderItem
+from .models import Cart, CartItem, Customer, Order, Product, Collection, Reviews, OrderItem
 
 
 class CollectionSerializer(serializers.Serializer):
@@ -157,15 +159,43 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ['id', 'customer', 'placed_at','payment_status','items']
 
 
+class UpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= Order
+        fields = ['payment_status']
+
+
 class CreateOrderSerialiser(serializers.Serializer):
     cart_id=serializers.UUIDField()
 
-    def save(self, **kwargs):
-        print(self.validated_data['cart_id'])
-        print(self.context['user_id'])
+    def validate_cart_id(self, cart_id):
+        if not Cart.objects.filter(pk=cart_id).exists():
+            raise(ValidationError('cart was not Exist.'))
+        if not CartItem.objects.filter(cart_id=cart_id).exists():
+            raise(ValidationError('This cart has not any Items'))
+        return cart_id
 
-        (customer,created)=Customer.objects.get_or_create(user_id=self.context['user_id'])
-        Order.objects.create(customer=customer)
+
+    def save(self, **kwargs):
+        with transaction.atomic():
+            cart_id=self.validated_data['cart_id']
+
+            (customer,created)=Customer.objects.get_or_create(user_id=self.context['user_id'])
+            order = Order.objects.create(customer=customer)
+            cartItems = CartItem.objects.select_related('product').filter(cart_id=cart_id)
+            orderItems = [
+                OrderItem(order=order,
+                            product = item.product,
+                            quantity = item.quantity,
+                            unit_price = item.product.unit_price
+                )
+                for item in cartItems
+            ]
+            OrderItem.objects.bulk_create(orderItems)
+
+            Cart.objects.filter(pk=cart_id).delete()
+            return order
+
 
 
 

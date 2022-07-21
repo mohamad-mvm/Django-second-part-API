@@ -18,7 +18,7 @@ from rest_framework import status
 from .permission import IsAdminOrReadOnly,FullDjangoModelPermissions, ViewCustomerHistory
 
 from .models import CartItem, Customer, Order, Product, Collection,OrderItem,Reviews,Cart
-from .serializers import CreateOrderSerialiser, CustomerSerializer, ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddToCartSerializer,UpdateCartItemSerializer, OrderSerializer
+from .serializers import CreateOrderSerialiser, CustomerSerializer, ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddToCartSerializer,UpdateCartItemSerializer, OrderSerializer, UpdateOrderSerializer
 from.filters import ProductFilter
 
 
@@ -114,11 +114,26 @@ class CustomerViewSet(ModelViewSet):
 
 
 class OrderViewSet(ModelViewSet):
-    permission_classes = [IsAuthenticated]
+    http_method_names = ['get','patch','delete','head','options']
+
+    def get_permissions(self):
+        if self.request.method in ['PATCH','DELETE']:
+            return[IsAdminUser()]
+        return[IsAuthenticated()]
+
+    def create(self, request, *args, **kwargs):
+        serializer = CreateOrderSerialiser(data=request.data, context= {'user_id': self.request.user.id})
+        serializer.is_valid(raise_exception=True)
+        order = serializer.save()
+        serializer=OrderSerializer(order)
+
+        return Response(serializer.data)
 
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method=='POST':
             return CreateOrderSerialiser
+        if self.request.method=="PATCH":
+            return UpdateOrderSerializer
         return OrderSerializer
 
     def get_queryset(self):
@@ -127,6 +142,3 @@ class OrderViewSet(ModelViewSet):
             return Order.objects.all()
         (customer_id,CREATED)=Customer.objects.only('id').get_or_create(user_id=user.id)
         return Order.objects.filter(customer_id=customer_id).all()
-
-    def get_serializer_context(self):
-        return {'user_id': self.request.user.id}
